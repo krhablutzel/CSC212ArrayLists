@@ -2,7 +2,6 @@ package edu.smith.cs.csc212.lists;
 
 import me.jjfoley.adt.ArrayWrapper;
 import me.jjfoley.adt.ListADT;
-import me.jjfoley.adt.errors.TODOErr;
 
 /**
  * A GrowableList is also known as an ArrayList. It starts at a particular size
@@ -50,8 +49,23 @@ public class GrowableList<T> extends ListADT<T> {
 
 	@Override
 	public T removeIndex(int index) {
-		// slide to the left
-		throw new TODOErr();
+		checkNotEmpty();
+		this.checkExclusiveIndex(index);
+		// so we can return removed element
+		T removed = array.getIndex(index);
+		
+		// slide to the left everything from index on
+		for (int i = index; i < size()-1; i++) {
+			array.setIndex(i, array.getIndex(i+1));
+		}
+		
+		// last element is null
+		array.setIndex(size()-1, null);
+		
+		// fill is smaller by 1
+		fill--;
+		
+		return removed;
 	}
 
 	@Override
@@ -71,14 +85,39 @@ public class GrowableList<T> extends ListADT<T> {
 	 * This private method is called when we need to make room in our GrowableList.
 	 */
 	private void resizeArray() {
-		// TODO: use this where necessary (already called in addBack!)
-		throw new TODOErr();
+		// New array twice as large
+		ArrayWrapper<T> larger = new ArrayWrapper<>(this.array.size() * 2);
+		
+		// Copy over elements of old array
+		for (int i = 0; i < this.array.size(); i++) {
+			larger.setIndex(i, this.array.getIndex(i));
+		}
+		
+		// Replace old array with new larger one
+		this.array = larger;
 	}
 
 	@Override
 	public void addIndex(int index, T item) {
+		// resize array if full already
+		if (fill >= array.size()) {
+			this.resizeArray();
+		}
+		
+		// make sure this is an index that's in the list already
+		// UNLESS adding to back
+		if (index != size()) {
+			checkExclusiveIndex(index);
+
+		}
+
 		// slide to the right
-		throw new TODOErr();
+		for (int i = fill++; i > index; i--) {
+			array.setIndex(i, array.getIndex(i-1));
+		}
+		
+		// fill in new element
+		array.setIndex(index, item);
 	}
 
 	@Override

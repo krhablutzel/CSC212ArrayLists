@@ -3,7 +3,6 @@ package edu.smith.cs.csc212.lists;
 import me.jjfoley.adt.ArrayWrapper;
 import me.jjfoley.adt.ListADT;
 import me.jjfoley.adt.errors.RanOutOfSpaceError;
-import me.jjfoley.adt.errors.TODOErr;
 
 /**
  * FixedSizeList is a List with a maximum size.
@@ -56,29 +55,42 @@ public class FixedSizeList<T> extends ListADT<T> {
 
 	@Override
 	public T getFront() {
-		throw new TODOErr();
+		checkNotEmpty();
+		this.checkExclusiveIndex(0);
+		return array.getIndex(0);
 	}
 
 	@Override
 	public T getBack() {
-		throw new TODOErr();
+		checkNotEmpty();
+		this.checkExclusiveIndex(fill-1);
+		return this.array.getIndex(fill-1);
 	}
 
 	@Override
 	public void addIndex(int index, T value) {
-		// slide to the right
-		throw new TODOErr();
+		if (!isFull()) {
+			// slide to the right
+			for (int i = fill++; i > index; i--) {
+				array.setIndex(i, array.getIndex(i-1));
+			}
+			
+			// fill in new element
+			array.setIndex(index, value);
+		} else {
+			throw new RanOutOfSpaceError();
+		}
 	}
 
 	@Override
 	public void addFront(T value) {
-		this.addIndex(0, value);
+		addIndex(0, value);
 	}
 
 	@Override
 	public void addBack(T value) {
 		if (fill < array.size()) {
-			array.setIndex(fill++, value);
+			array.setIndex(fill++, value); // why not fill? over one too many?
 		} else {
 			throw new RanOutOfSpaceError();
 		}
@@ -86,17 +98,34 @@ public class FixedSizeList<T> extends ListADT<T> {
 
 	@Override
 	public T removeIndex(int index) {
-		// slide to the left
-		throw new TODOErr();
+		checkNotEmpty();
+		this.checkExclusiveIndex(index);
+		// so we can return removed element
+		T removed = array.getIndex(index);
+		
+		// slide to the left everything from index on
+		for (int i = index; i < size()-1; i++) {
+			array.setIndex(i, array.getIndex(i+1));
+		}
+		
+		// last element is null
+		array.setIndex(size()-1, null);
+		
+		// fill is smaller by 1
+		fill--;
+		
+		return removed;
 	}
 
 	@Override
 	public T removeBack() {
-		throw new TODOErr();
+		checkNotEmpty();
+		return removeIndex(fill - 1);
 	}
 
 	@Override
 	public T removeFront() {
+		checkNotEmpty();
 		return removeIndex(0);
 	}
 
@@ -108,5 +137,4 @@ public class FixedSizeList<T> extends ListADT<T> {
 	public boolean isFull() {
 		return this.fill == this.array.size();
 	}
-
 }

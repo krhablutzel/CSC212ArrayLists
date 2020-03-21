@@ -35,7 +35,7 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 	private FixedSizeList<T> makeChunk() {
 		return new FixedSizeList<>(chunkSize);
 	}
-
+	
 	@Override
 	public T removeFront() {
 		throw new TODOErr();
@@ -43,11 +43,26 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 
 	@Override
 	public T removeBack() {
-		throw new TODOErr();
+		checkNotEmpty();
+		
+		// remove end of last chunk
+		T removed = chunks.getBack().removeBack();
+		
+		// remove last chunk if it's empty
+		if (chunks.getBack().isEmpty()) {
+			chunks.removeBack();
+		}
+		
+		return removed;
 	}
 
 	@Override
 	public T removeIndex(int index) {
+		checkNotEmpty();
+		
+		// CAN'T USE same strategy as getIndex for finding where index is 
+		// BECAUSE current modification exception
+		
 		throw new TODOErr();
 	}
 
@@ -58,7 +73,18 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 
 	@Override
 	public void addBack(T item) {
-		throw new TODOErr();
+		// fix empty list to have one chunk
+		if (this.isEmpty()) {
+			chunks.addBack(makeChunk());
+		}
+		
+		// if last chunk is full, add another
+		if (chunks.getBack().isFull()) {
+			chunks.addBack(makeChunk()); // TODO I suppose this could be its own method because I use it twice
+		}
+		
+		// add to end of last chunk
+		chunks.getBack().addBack(item);
 	}
 
 	@Override
@@ -127,7 +153,23 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 	
 	@Override
 	public void setIndex(int index, T value) {
-		throw new TODOErr();
+		checkNotEmpty();
+		// same strategy as getIndex for finding where index is 
+		int start = 0;
+		for (FixedSizeList<T> chunk : this.chunks) {
+			// calculate chunk bounds
+			int end = start + chunk.size();
+			
+			// index in this chunk?
+			if (start <= index && index < end) {
+				chunk.setIndex(index - start, value);
+				return;
+			}
+			
+			// update bounds for next chunk
+			start = end;
+		}
+		throw new BadIndexError(index);
 	}
 
 	@Override
