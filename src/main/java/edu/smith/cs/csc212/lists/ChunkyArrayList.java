@@ -2,8 +2,6 @@ package edu.smith.cs.csc212.lists;
 
 import me.jjfoley.adt.ListADT;
 import me.jjfoley.adt.errors.BadIndexError;
-import me.jjfoley.adt.errors.EmptyListError;
-import me.jjfoley.adt.errors.TODOErr;
 
 /**
  * This is a data structure that has an array inside each node of an ArrayList.
@@ -138,24 +136,28 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 			// Check whether the index should be in this chunk:
 			if (start <= index && index <= end) {
 				if (chunk.isFull()) {
-					// check can roll to next
-					// if no next chunk or if next chunk if full
+					// check there's space in next chunk
+					// (if no next chunk or if next chunk is full, add chunk)
 					if (chunkIndex + 1 == this.chunks.size() || this.chunks.getIndex(chunkIndex+1).isFull()) {
 						this.chunks.addIndex(chunkIndex+1, makeChunk());
 					}
+
+					if (index - start == 3) {
+						// actually belongs at start of next chunk
+						this.chunks.getIndex(chunkIndex+1).addFront(item);
+					} else {
+						// roll end of chunk to next chunk
+						this.chunks.getIndex(chunkIndex+1).addFront(this.chunks.getIndex(chunkIndex).removeBack());
+												
+						// add this item in newly vacated space
+						this.chunks.getIndex(chunkIndex).addIndex(index - start, item);
+					}
 					
-					// roll to next
-					this.chunks.getIndex(chunkIndex+1).addFront(this.chunks.getIndex(chunkIndex).removeBack());
-					
-					// add this item in newly vacated space
-					this.chunks.getIndex(chunkIndex).addIndex(index - start, item);
 				} else {
 					// put right in this chunk, there's space.
 					this.chunks.getIndex(chunkIndex).addIndex(index - start, item);
 				}	
 				// upon adding, return.
-				System.out.println("Item: " + item);
-				System.out.println(this);
 				return;
 			}
 			
