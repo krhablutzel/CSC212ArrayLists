@@ -95,13 +95,11 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 		}
 		
 		return removed;
-
 	}
 
 	@Override
 	public void addFront(T item) {
 		addIndex(0, item);
-	
 	}
 
 	@Override
